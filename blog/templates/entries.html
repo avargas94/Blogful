@@ -1,0 +1,37 @@
+{% import "macros.html" as macros %}
+{% extends "base.html" %}
+{% block content %}
+
+{% for entry in entries %}
+{{ macros.render_entry_link(entry) }}
+{% endfor %}
+
+<ul class="pager">
+    {% if has_next %}
+    <li class="previous">
+        <a href="{{ url_for('entries', page=page + 1, limit=request.args.get('limit')) }}">&larr; Older</a>
+    </li>
+    {% endif%}
+    <li>
+        <div class="dropup">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Entry Per Page
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+            <li><a href="{{url_for('entries', limit=5) }}">5 Per Page</a></li>
+            <li><a href="{{url_for('entries', limit=10) }}">10 Per Page</a></li>
+            <li><a href="{{url_for('entries', limit=20) }}">20 Per Page</a></li>
+            <li><a href="{{url_for('entries', limit=50) }}">50 Per Page</a></li>
+          </ul>
+        </div>
+    </li>
+    {% if has_prev %}
+    <li class="next">
+        <a href="{{ url_for('entries', page=page - 1, limit=request.args.get('limit')) }}">&rarr; Newer</a>
+    </li>
+    {% endif%}
+</ul>
+
+{% endblock %}
+
