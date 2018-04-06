@@ -3,7 +3,13 @@ from flask import render_template, request, redirect, url_for
 from . import app
 from .database import  session, Entry
 
+from flask import flash
+from flask_login import login_user, login_required, current_user, logout_user
+from werkzeug.security import check_password_hash
+from .database import User
+
 PAGINATE_BY = 10
+
 
 @app.route('/', methods=['GET'])
 @app.route('/page/<int:page>', methods=['GET'])
@@ -40,15 +46,18 @@ def entries(page=1):
 
 
 @app.route('/entry/add', methods=['GET'])
+@login_required
 def add_entry_get():
     return render_template("add_entry.html")
 
 
 @app.route('/entry/add', methods=['POST'])
+@login_required
 def add_entry_post():
     entry = Entry(
         title=request.form["title"],
         content=request.form['content'],
+        author=current_user,
     )
     session.add(entry)
     session.commit()
@@ -67,6 +76,7 @@ def view_entry(id):
 
 
 @app.route('/entry/<int:id>/edit', methods=['GET'])
+@login_required
 def edit_get(id):
     entry = session.query(Entry).get(id)
 
@@ -77,6 +87,7 @@ def edit_get(id):
 
 
 @app.route('/entry/<int:id>/edit', methods=['POST'])
+@login_required
 def edit_post(id):
 
     entry = session.query(Entry).get(id)
@@ -88,6 +99,7 @@ def edit_post(id):
 
 
 @app.route('/entry/<id>/delete', methods=['GET'])
+@login_required
 def delete_entry(id):
 
     entry = session.query(Entry).get(id)
@@ -95,3 +107,28 @@ def delete_entry(id):
     session.commit()
 
     return redirect(url_for("entries"))
+
+
+@app.route('/login', methods=['GET'])
+def login_get():
+    return render_template("login.html")
+
+
+@app.route("/login", methods=["POST"])
+def login_post():
+    email = request.form["email"]
+    password = request.form["password"]
+    user = session.query(User).filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+        flash("Incorrect username or password", "danger")
+        return redirect(url_for("login_get"))
+
+    login_user(user)
+    return redirect(request.args.get('next') or url_for("entries"))
+
+
+@app.route("/logout")
+def logout():
+
+    logout_user()
+    return redirect(url_for('entries'))
