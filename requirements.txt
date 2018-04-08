@@ -4,3 +4,4 @@ flask-login
 flask-migrate
 mistune
 psycopg2
+splinter
