@@ -8,8 +8,6 @@ from flask_login import login_user, login_required, current_user, logout_user
 from werkzeug.security import check_password_hash
 from .database import User
 
-PAGINATE_BY = 10
-
 
 @app.route('/', methods=['GET'])
 @app.route('/page/<int:page>', methods=['GET'])
@@ -25,7 +23,6 @@ def entries(page=1):
     count = session.query(Entry).count()
 
     start = page_index * limit
-    """start = page_index * PAGINATE_BY + 1 - Caused Entry 24 not to show on the website"""
     end = start + limit
 
     total_pages = (count - 1) // limit + 1
